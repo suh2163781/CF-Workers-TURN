@@ -7,7 +7,7 @@ on:
     paths:
       - 'ip_list.txt'
   schedule:
-    - cron: '0 0 1 * *'
+    - cron: '5 1 * * *'
 
 permissions:
   contents: write
