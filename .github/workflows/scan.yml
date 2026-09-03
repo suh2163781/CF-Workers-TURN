@@ -67,7 +67,18 @@ jobs:
           git config user.email "github-actions@github.com"
           git add turn_results.txt
           git diff --cached --quiet || git commit -m "update scan result $(date '+%Y-%m-%d %H:%M:%S')"
-          git push
+
+          # 推送前先同步远端，避免 rejected 冲突
+          git pull --rebase origin main || {
+            echo "rebase 冲突，改为用本地这次结果覆盖提交"
+            git rebase --abort
+            git fetch origin main
+            git reset --soft origin/main
+            git add turn_results.txt
+            git commit -m "update scan result $(date '+%Y-%m-%d %H:%M:%S') (resolved)" --allow-empty
+          }
+
+          git push origin HEAD:main
 
       - name: Publish to Releases (overwrite latest)
         uses: softprops/action-gh-release@v2
