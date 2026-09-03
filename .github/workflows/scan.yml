@@ -2,10 +2,14 @@ name: Turn Scan
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     paths:
       - 'ip_list.txt'
+    paths-ignore:
+      - 'turn_results.txt'
   schedule:
-    - cron: '0 0 1 * *'  # 每月自动跑，不需要可删掉
+    - cron: '0 0 1 * *'
 
 permissions:
   contents: write
@@ -13,6 +17,10 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+concurrency:
+  group: turn-scan
+  cancel-in-progress: true
 
 jobs:
   scan:
@@ -41,6 +49,10 @@ jobs:
 
       - name: Add turn:// prefix to results
         run: |
+          if [ ! -s turn_results.txt ]; then
+            echo "警告: turn_results.txt 为空或不存在，跳过后续步骤"
+            exit 0
+          fi
           awk '{
             if ($0 !~ /^turn:\/\//) {
               print "turn://" $0
@@ -49,13 +61,40 @@ jobs:
             }
           }' turn_results.txt > turn_results.tmp && mv turn_results.tmp turn_results.txt
 
-      - name: Commit result
+      - name: Commit and push result (with retry)
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add turn_results.txt
-          git diff --cached --quiet || git commit -m "update scan result $(date '+%Y-%m-%d %H:%M:%S')"
-          git push
+
+          for i in 1 2 3 4 5; do
+            echo "=== 第 $i 次尝试 ==="
+
+            # 每次尝试前都先同步远端最新状态
+            git fetch origin main
+            git reset --soft origin/main
+
+            git add turn_results.txt
+
+            if git diff --cached --quiet; then
+              echo "没有变化需要提交"
+              break
+            fi
+
+            git commit -m "update scan result $(date '+%Y-%m-%d %H:%M:%S')"
+
+            if git push origin HEAD:main; then
+              echo "推送成功"
+              break
+            else
+              echo "推送失败，等待后重试..."
+              sleep $((RANDOM % 10 + 5))
+            fi
+
+            if [ "$i" -eq 5 ]; then
+              echo "多次尝试后仍然失败"
+              exit 1
+            fi
+          done
 
       - name: Publish to Releases (overwrite latest)
         uses: softprops/action-gh-release@v2
@@ -63,7 +102,7 @@ jobs:
           tag_name: latest
           name: "Turn Scan Latest"
           files: turn_results.txt
-          body: "自动扫描结果，生成时间 ${{ github.event.head_commit.timestamp || github.run_started_at }}"
+          body: "自动扫描结果，生成时间 ${{ github.run_started_at }}"
 
       - name: Clean up old workflow runs (all workflows, keep latest each)
         run: |
