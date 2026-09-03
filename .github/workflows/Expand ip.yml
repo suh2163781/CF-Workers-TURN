@@ -46,7 +46,8 @@ jobs:
                           continue
 
                       for ip in network.hosts():
-                          expanded.append(f"{ip}:3478")
+                          for port in [3478, 3479, 5349]:
+                              expanded.append(f"{ip}:{port}")
 
                       print(f"✅ Line {line_num}: {line} → {count - 2} hosts")
 
