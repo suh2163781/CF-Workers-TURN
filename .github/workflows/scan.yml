@@ -6,8 +6,6 @@ on:
       - main
     paths:
       - 'ip_list.txt'
-    paths-ignore:
-      - 'turn_results.txt'
   schedule:
     - cron: '0 0 1 * *'
 
@@ -69,7 +67,6 @@ jobs:
           for i in 1 2 3 4 5; do
             echo "=== 第 $i 次尝试 ==="
 
-            # 每次尝试前都先同步远端最新状态
             git fetch origin main
             git reset --soft origin/main
 
