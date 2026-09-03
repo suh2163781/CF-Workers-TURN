@@ -1,72 +1,66 @@
-name: Expand IP Ranges
-
+name: Turn Scan
 on:
-  push:
-    paths:
-      - 'ip.txt'        # ip.txt 变更时自动触发
-  workflow_dispatch:    # 支持手动触发
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 1 * *'  # 每月自动跑，不需要可删掉
+
+permissions:
+  contents: write   # 发布 release 需要写权限
 
 jobs:
-  expand-ip:
+  scan:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write   # 允许写入仓库（提交 ip_list.txt）
-
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Expand IP ranges
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build
+        run: go build -o turn_scan .
+
+      - name: Run scan
         run: |
-          python3 - <<'EOF'
-          import ipaddress
-          import sys
+          ./turn_scan \
+            -c 100 \
+            -p 500 \
+            -pt 3 \
+            -t 5 \
+            -ct 8 \
+            ip_list.txt
 
-          input_file = "ip.txt"
-          output_file = "ip_list.txt"
-
-          expanded = []
-
-          with open(input_file, "r") as f:
-              for line_num, raw in enumerate(f, 1):
-                  line = raw.strip()
-
-                  # 跳过空行和注释行
-                  if not line or line.startswith("#"):
-                      continue
-
-                  try:
-                      network = ipaddress.ip_network(line, strict=False)
-                      count = network.num_addresses
-
-                      # 安全限制：单个 CIDR 展开不超过 65536 个 IP（/16）
-                      if count > 65536:
-                          print(f"⚠️  Line {line_num}: {line} → {count} addresses, skipping (too large, use /16 or smaller)")
-                          continue
-
-                      for ip in network.hosts():
-                          expanded.append(str(ip))
-
-                      print(f"✅ Line {line_num}: {line} → {count - 2} hosts")
-
-                  except ValueError as e:
-                      print(f"❌ Line {line_num}: '{line}' is invalid — {e}", file=sys.stderr)
-
-          with open(output_file, "w") as f:
-              f.write("\n".join(expanded) + ("\n" if expanded else ""))
-
-          print(f"\n📄 Total IPs written to {output_file}: {len(expanded)}")
-          EOF
-
-      - name: Commit and push ip_list.txt
+      - name: Add turn:// prefix to results
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ip_list.txt
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "chore: update ip_list.txt from ip.txt [skip ci]"
-            git push
-          fi
+          # 给每一行非空内容加上 turn:// 前缀（如果已经有前缀则跳过）
+          sed -i -E 's#^([^t]|t[^u]|tu[^r]|tur[^n])#turn://\1#' turn_results.txt || true
+          # 更稳妥的写法：直接对不以 turn:// 开头的行加前缀
+          awk '{
+            if ($0 !~ /^turn:\/\//) {
+              print "turn://" $0
+            } else {
+              print $0
+            }
+          }' turn_results.txt > turn_results.tmp && mv turn_results.tmp turn_results.txt
+
+      - name: Set release tag
+        id: vars
+        run: echo "tag=scan-$(date -u '+%Y%m%d-%H%M%S')" >> "$GITHUB_OUTPUT"
+
+      - name: Commit result
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add turn_results.txt
+          git diff --cached --quiet || git commit -m "update scan result $(date '+%Y-%m-%d %H:%M:%S')"
+          git push
+
+      - name: Publish to Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.tag }}
+          name: "Turn Scan ${{ steps.vars.outputs.tag }}"
+          files: turn_results.txt
+          body: "自动扫描结果，生成时间 $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
