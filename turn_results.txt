@@ -1,2 +1,7 @@
+turn://203.69.30.64:3478 ALL  [商企IP] CRED(test:test) Coturn-4.6.1 'Gorst'
+turn://203.69.30.64:5349 ALL  [商企IP] CRED(test:test) Coturn-4.6.1 'Gorst'
+turn://210.61.8.201:3478 UDP  [] NO_AUTH Coturn-4.4.5.4 'Ardee West'
+turn://210.61.8.201:3479 UDP  [] NO_AUTH Coturn-4.4.5.4 'Ardee West'
+turn://211.75.65.85:3478 ALL  [商企IP] CRED(test:test) Coturn-4.6.2 'Gorst'
 turn://202.133.230.217:3478 ALL  [商企IP] NO_AUTH 
 turn://202.133.230.218:3478 ALL  [商企IP] NO_AUTH 
