@@ -3,8 +3,8 @@ name: Expand IP Ranges
 on:
   push:
     paths:
-      - 'ip.txt'        # ip.txt 变更时自动触发
-  workflow_dispatch:    # 支持手动触发
+      - 'ip.txt'        
+  workflow_dispatch:    
 
 jobs:
   expand-ip:
