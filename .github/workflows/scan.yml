@@ -2,8 +2,12 @@ name: Turn Scan
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main        
     paths:
       - 'ip_list.txt'
+    paths-ignore:
+      - 'turn_results.txt'   
   schedule:
     - cron: '0 0 1 * *'  # 每月自动跑，不需要可删掉
 
@@ -13,6 +17,10 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+concurrency:
+  group: turn-scan
+  cancel-in-progress: true   
 
 jobs:
   scan:
@@ -41,6 +49,10 @@ jobs:
 
       - name: Add turn:// prefix to results
         run: |
+          if [ ! -s turn_results.txt ]; then
+            echo "警告: turn_results.txt 为空或不存在，跳过后续步骤"
+            exit 0
+          fi
           awk '{
             if ($0 !~ /^turn:\/\//) {
               print "turn://" $0
@@ -63,7 +75,7 @@ jobs:
           tag_name: latest
           name: "Turn Scan Latest"
           files: turn_results.txt
-          body: "自动扫描结果，生成时间 ${{ github.event.head_commit.timestamp || github.run_started_at }}"
+          body: "自动扫描结果，生成时间 ${{ github.run_started_at }}"
 
       - name: Clean up old workflow runs (all workflows, keep latest each)
         run: |
