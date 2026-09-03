@@ -1,9 +1,14 @@
 name: Turn Scan
-
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'ip_list.txt'
   schedule:
     - cron: '0 0 1 * *'  # 每月自动跑，不需要可删掉
+
+permissions:
+  contents: write   # 发布 release 需要写权限
 
 jobs:
   scan:
@@ -30,6 +35,16 @@ jobs:
             -ct 8 \
             ip_list.txt
 
+      - name: Add turn:// prefix to results
+        run: |
+          awk '{
+            if ($0 !~ /^turn:\/\//) {
+              print "turn://" $0
+            } else {
+              print $0
+            }
+          }' turn_results.txt > turn_results.tmp && mv turn_results.tmp turn_results.txt
+
       - name: Commit result
         run: |
           git config user.name "github-actions"
@@ -37,3 +52,11 @@ jobs:
           git add turn_results.txt
           git diff --cached --quiet || git commit -m "update scan result $(date '+%Y-%m-%d %H:%M:%S')"
           git push
+
+      - name: Publish to Releases (overwrite latest)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "Turn Scan Latest"
+          files: turn_results.txt
+          body: "自动扫描结果，生成时间 $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
