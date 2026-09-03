@@ -8,7 +8,11 @@ on:
     - cron: '0 0 1 * *'  # 每月自动跑，不需要可删掉
 
 permissions:
-  contents: write   # 发布 release 需要写权限
+  contents: write
+  actions: write
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   scan:
@@ -59,4 +63,27 @@ jobs:
           tag_name: latest
           name: "Turn Scan Latest"
           files: turn_results.txt
-          body: "自动扫描结果，生成时间 $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          body: "自动扫描结果，生成时间 ${{ github.event.head_commit.timestamp || github.run_started_at }}"
+
+      - name: Clean up old workflow runs (all workflows, keep latest each)
+        run: |
+          WORKFLOW_IDS=$(gh api "repos/${{ github.repository }}/actions/workflows" \
+            --jq '.workflows[].id')
+
+          for wf_id in $WORKFLOW_IDS; do
+            echo "=== 处理 workflow ID: $wf_id ==="
+
+            RUN_IDS=$(gh api "repos/${{ github.repository }}/actions/workflows/${wf_id}/runs?per_page=100" \
+              --jq '.workflow_runs[].id')
+
+            COUNT=0
+            for id in $RUN_IDS; do
+              COUNT=$((COUNT+1))
+              if [ "$COUNT" -eq 1 ]; then
+                echo "保留最新记录: $id"
+                continue
+              fi
+              echo "删除旧记录: $id"
+              gh run delete "$id" || true
+            done
+          done
