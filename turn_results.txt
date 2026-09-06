@@ -1,2 +1,4 @@
-turn://66.198.28.52:3478 ALL  [商企IP] NO_AUTH Coturn-4.6.2 'Gorst'
-turn://195.219.118.44:3478 ALL  [商企IP] NO_AUTH 
+turn://176.235.232.56:3478 ALL  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
+turn://176.236.97.53:3478 ALL  [商企IP] NO_AUTH 
+turn://195.142.6.170:3478 ALL  [商企IP] NO_AUTH Coturn-4.5.1.1 'dan Eider'
+turn://213.14.27.103:3478 ALL  [商企IP] NO_AUTH 
