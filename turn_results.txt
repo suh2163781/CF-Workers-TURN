@@ -1,6 +1,6 @@
-turn://212.66.105.99:3479 ALL  [商企IP] NO_AUTH None
-turn://212.66.105.99:3478 ALL  [商企IP] NO_AUTH None
-turn://81.211.100.205:3478 ALL  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
-turn://81.222.121.205:3478 ALL  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
-turn://128.69.179.110:3478 ALL  [商企IP] NO_AUTH 
-turn://195.218.157.172:3478 TCP  [商企IP] NO_AUTH 
+turn://46.39.0.53:3479 ALL  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
+turn://46.39.0.53:3478 ALL  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
+turn://94.155.35.4:3479 ALL  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
+turn://94.155.35.4:3478 ALL  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
+turn://94.155.35.12:3479 ALL  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
+turn://94.155.35.12:3478 ALL  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
