@@ -1,6 +1,1 @@
-turn://46.39.0.53:3479 ALL  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
-turn://46.39.0.53:3478 ALL  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
-turn://94.155.35.4:3479 ALL  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
-turn://94.155.35.4:3478 ALL  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
-turn://94.155.35.12:3479 ALL  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
-turn://94.155.35.12:3478 ALL  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
+turn://203.251.83.233:3478 UDP  [] NO_AUTH 
