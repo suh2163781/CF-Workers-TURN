@@ -1,1 +1,1 @@
-turn://203.251.83.233:3478 UDP  [] NO_AUTH 
+turn://211.51.80.113:3478 ALL  [商企IP] NO_AUTH Coturn-4.6.2 'Gorst'
