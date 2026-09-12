@@ -1,1 +1,4 @@
-turn://211.51.80.113:3478 ALL  [商企IP] NO_AUTH Coturn-4.6.2 'Gorst'
+turn://91.103.211.196:3478 TCP  [商企IP] NO_AUTH Coturn-4.6.2 'Gorst'
+turn://188.246.186.186:3478 TCP  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
+turn://195.209.218.31:3478 TCP  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
+turn://195.209.218.31:3479 TCP  [商企IP] NO_AUTH Coturn-4.5.2 'dan Eider'
